@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ISDA — User Verification Portal</title>
+<meta name="description" content="Search official ISDA user verification pages. Report suspicious or inaccurate pages to isda-user-report@googlegroups.com." />
+<style>
+  :root{
+    --brand:#0b3d91; --bg:#f4f6f8; --card:#ffffff; --muted:#6b7280; --success:#0f9d58; --danger:#d93025;
+    --radius:12px;
+  }
+  html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;background:var(--bg);color:#111}
+  .wrap{max-width:880px;margin:48px auto;padding:24px}
+  header{background:var(--brand);color:#fff;padding:28px;border-radius:var(--radius);text-align:center;box-shadow:0 6px 20px rgba(11,61,145,0.08)}
+  header h1{margin:0;font-size:1.6rem;letter-spacing:0.2px}
+  header p{margin:8px 0 0;font-size:0.95rem;opacity:0.95}
+  main{margin-top:20px;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(20,20,20,0.04)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  label{display:block;font-weight:600;margin-bottom:6px;color:#0b3d91}
+  input[type="text"], input[type="url"]{width:100%;padding:12px;border-radius:8px;border:1px solid #e6e9ef;font-size:0.96rem}
+  .col{flex:1;min-width:220px}
+  .actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+  button{background:var(--brand);color:#fff;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600}
+  button.secondary{background:#fff;color:var(--brand);border:1px solid rgba(11,61,145,0.12)}
+  button.warn{background:var(--danger);border:0}
+  .note{margin-top:14px;color:var(--muted);font-size:0.92rem}
+  .result{margin-top:14px;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #e6eef9;color:#111}
+  .result.ok{border-color:rgba(15,157,88,0.12);background:#f0fff4}
+  .result.missing{border-color:rgba(217,48,37,0.12);background:#fff6f6}
+  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem}
+  a.mail{color:var(--brand);font-weight:600;text-decoration:none}
+  @media (max-width:640px){ .row{flex-direction:column} header{padding:20px} }
+</style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    <header>
+      <h1>ISDA — User Verification Portal</h1>
+      <p>Search official ISDA verification pages and report concerns. Only verified user pages (e.g. <code>USERNAME.html</code>) are published here.</p>
+    </header>
+
+    <main aria-labelledby="searchHeading">
+      <h2 id="searchHeading" style="margin:0 0 12px;color:#0b3d91">Find a Member's Verification Page</h2>
+
+      <div class="row" style="align-items:flex-end">
+        <div class="col">
+          <label for="username">Username</label>
+          <input id="username" type="text" inputmode="text" placeholder="Enter exact username (e.g. MYTH)" aria-label="Username to search" />
+        </div>
+
+        <div style="width:220px">
+          <label>&nbsp;</label>
+          <div class="actions">
+            <button onclick="goToUser()" title="Open username.html">Open Page</button>
+            <button class="secondary" onclick="checkExists()" title="Check whether username.html exists">Check</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="status" class="note" aria-live="polite">
+        Tip: type a username and click <strong>Check</strong> to verify the page exists before opening.
+      </div>
+
+      <div id="result" class="result" style="display:none"></div>
+
+      <section style="margin-top:20px">
+        <h3 style="color:#0b3d91;margin:0 0 8px">Why this data is published</h3>
+        <p class="note">
+          ISDA publishes these limited verification pages to increase transparency and trust: each page confirms a member’s official role and public contact information (if the member chose to publish it). We do <strong>not</strong> publish sensitive data such as passwords, private keys or confidential documents. Pages are intended only for public verification and contact in professional contexts.
+        </p>
+      </section>
+
+      <section style="margin-top:18px">
+        <h3 style="color:#0b3d91;margin:0 0 8px">Report a Problem or Impersonation</h3>
+        <p class="note">
+          If you find inaccurate information, an impersonation, or other misuse, please report it to ISDA's review team:
+          <br>
+          <a class="mail" href="mailto:isda-user-report@googlegroups.com">isda-user-report@googlegroups.com</a>
+        </p>
+        <div style="margin-top:10px" class="row">
+          <div class="col">
+            <label for="reportUser">Username to report</label>
+            <input id="reportUser" type="text" placeholder="Enter username (e.g. MYTH)" />
+          </div>
+          <div style="min-width:220px">
+            <label>&nbsp;</label>
+            <div class="actions">
+              <button onclick="openReportMail()" class="secondary">Open report email</button>
+              <button onclick="copyReportTemplate()" class="secondary">Copy report template</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="note" style="margin-top:10px">
+          When reporting, please include: the username, URL (e.g. <code>https://your-org.github.io/USER/USERNAME.html</code>), the reason for reporting, any supporting evidence (screenshots, links), and your contact information so ISDA can follow up.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      © 2025 Indian Software Developers Association (ISDA) • For verification only — no sensitive personal data published.
+    </footer>
+  </div>
+
+<script>
+  // Redirect to username.html (same repo)
+  function goToUser(){
+    const u = (document.getElementById('username').value || '').trim();
+    if(!u){ alert('Please enter a username.'); return; }
+    // Normalize: remove spaces, encode
+    const safe = encodeURIComponent(u);
+    window.location.href = `${safe}.html`;
+  }
+
+  // Check whether username.html exists (tries HEAD then GET fallback)
+  async function checkExists(){
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+    resultEl.style.display = 'none';
+    const u = (document.getElementById('username').value || '').trim();
+    if(!u){ alert('Please enter a username to check.'); return; }
+
+    statusEl.textContent = 'Checking...';
+    const safe = encodeURIComponent(u) + '.html';
+    try {
+      // try HEAD first (servers may not support it)
+      let ok = false;
+      try {
+        const r = await fetch(safe, {method:'HEAD', cache:'no-store'});
+        ok = r && r.ok;
+      } catch(e){
+        // HEAD may be blocked — try GET
+        const r2 = await fetch(safe, {method:'GET', cache:'no-store'});
+        ok = r2 && r2.ok;
+      }
+
+      if(ok){
+        resultEl.className = 'result ok';
+        resultEl.innerHTML = `<strong>Found:</strong> <a href="${safe}" target="_blank" rel="noopener">${u}.html</a> — page appears published.`;
+      } else {
+        resultEl.className = 'result missing';
+        resultEl.innerHTML = `<strong>Not found:</strong> ${u}.html does not appear to exist (HTTP returned non-OK). You can still create and publish this file if you are the administrator.`;
+      }
+    } catch(err){
+      resultEl.className = 'result missing';
+      resultEl.innerHTML = `<strong>Unable to verify:</strong> an error occurred while checking ${u}.html. (Network or hosting may block fetch.)`;
+    } finally {
+      resultEl.style.display = 'block';
+      statusEl.textContent = 'Status: check completed.';
+    }
+  }
+
+  // Open prefilled mailto with template to report user
+  function openReportMail(){
+    const user = (document.getElementById('reportUser').value || '').trim();
+    const subject = encodeURIComponent(user ? `Report ISDA user: ${user}` : 'Report ISDA user');
+    const bodyLines = [
+      'Please provide the following information:',
+      '',
+      user ? `Username: ${user}` : 'Username: ',
+      'User page URL: ',
+      'Reason for report (impersonation/inaccurate data/other): ',
+      'Evidence (links or brief description): ',
+      'Your contact email (optional): ',
+      '',
+      'ISDA review team — please investigate and respond as appropriate.'
+    ];
+    const body = encodeURIComponent(bodyLines.join('\n'));
+    // Use mailto (opens default mail client)
+    window.location.href = `mailto:isda-user-report@googlegroups.com?subject=${subject}&body=${body}`;
+  }
+
+  // Copy a plain-text report template to clipboard
+  async function copyReportTemplate(){
+    const user = (document.getElementById('reportUser').value || '').trim();
+    const template = [
+      'Report for ISDA user verification',
+      '',
+      `Username: ${user}`,
+      'User page URL: ',
+      'Reason for report: ',
+      'Evidence (links / screenshots): ',
+      'Reporter contact (optional): ',
+      '',
+      'Please investigate and take appropriate action.'
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(template);
+      alert('Report template copied to clipboard. Paste into your email to isda-user-report@googlegroups.com.');
+    } catch(e){
+      alert('Could not copy to clipboard — please select and copy manually:\n\n' + template);
+    }
+  }
+</script>
+</body>
+</html>
